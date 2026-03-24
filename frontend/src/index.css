@@ -1,0 +1,347 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: radial-gradient(circle at top, #111827, #020617 55%);
+  color: #e5e7eb;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 2rem 1rem 3rem;
+}
+
+.app-root > main {
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.app-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.app-header p {
+  margin: 0;
+  color: #9ca3af;
+}
+
+.decks-page {
+  width: 100%;
+}
+
+.card {
+  background: rgba(15, 23, 42, 0.96);
+  border-radius: 1rem;
+  padding: 1.5rem 1.75rem 1.75rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+.deck-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.field span {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  color: #d1d5db;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.field input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn {
+  border-radius: 999px;
+  border: none;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.08s ease,
+    box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.btn.primary {
+  background: linear-gradient(to right, #38bdf8, #6366f1);
+  color: white;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+.btn.secondary {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
+}
+
+.btn.danger {
+  background: linear-gradient(to right, #f97373, #ef4444);
+  color: white;
+}
+
+.btn.small {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+.error {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.deck-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.deck-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.35rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.9),
+    rgba(15, 23, 42, 0.7)
+  );
+}
+
+.deck-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.deck-name {
+  font-weight: 500;
+}
+
+.deck-meta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.deck-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.deck-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.6rem 0.4rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.9),
+    rgba(15, 23, 42, 0.7)
+  );
+}
+
+.card-main {
+  max-width: 70%;
+}
+
+.card-question {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.card-answer-preview {
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  margin-bottom: 0.15rem;
+}
+
+.card-meta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.study-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.study-difficulty {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+}
+
+.flashcard {
+  margin-top: 0.5rem;
+  width: 100%;
+  min-height: 180px;
+  border-radius: 1rem;
+  border: 1px dashed rgba(148, 163, 184, 0.6);
+  background: radial-gradient(circle at top left, #1e293b, #020617 60%);
+  color: #e5e7eb;
+  padding: 1.25rem 1.1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.flashcard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.8);
+  border-color: #38bdf8;
+}
+
+.flashcard-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9ca3af;
+}
+
+.flashcard-text {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.flashcard-hint {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 1.25rem 1.1rem 1.4rem;
+  }
+
+  .deck-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .deck-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+
