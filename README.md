@@ -71,7 +71,7 @@ Usually `http://localhost:4533`. API calls go through the proxy in `vite.config.
 - Decks: `GET/POST /api/decks`, `PUT/DELETE /api/decks/{id}`
 - Cards: `GET /api/decks/{deck_id}/cards`, `POST /api/cards`, `PUT/DELETE /api/cards/{id}`
 
-## Stuff that was annoying / what I learned
+## Stuff that was annoying
 
 I picked SQLite because it’s just a file and I didn’t want to install a whole database server on every machine. FastAPI + Pydantic made the API pretty quick to write. Hooking React to the API was mostly fine once I put all the `fetch` stuff in `api.js` so the pages weren’t a mess. The SPA part is literally “change a string in state and render a different component” in `App.jsx` — no React Router, but it still counts as single page for me.
 

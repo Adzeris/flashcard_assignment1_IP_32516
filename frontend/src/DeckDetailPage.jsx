@@ -15,6 +15,8 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
   const [editingQuestion, setEditingQuestion] = useState("");
   const [editingAnswer, setEditingAnswer] = useState("");
   const [editingDifficulty, setEditingDifficulty] = useState(1);
+  const [shuffleStudy, setShuffleStudy] = useState(true);
+  const [studyMode, setStudyMode] = useState("practice");
 
   useEffect(() => {
     let isMounted = true;
@@ -203,16 +205,66 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
           </p>
         )}
 
-        <div className="deck-header-row">
-          <h3 style={{ marginBottom: "0.25rem" }}>Cards</h3>
+        <div className="study-header-grid">
+          <h3 className="cards-section-title">Cards</h3>
           {cards.length > 0 && (
-            <button
-              type="button"
-              className="btn primary small"
-              onClick={() => onStartStudy(cards)}
-            >
-              Start study ({cards.length})
-            </button>
+            <div className="study-options-block">
+              <div className="study-controls-row">
+                <div
+                  className={`study-mode-group${saving ? " is-disabled" : ""}`}
+                  role="group"
+                  aria-label="Study mode"
+                >
+                  <span className="study-mode-heading">Mode</span>
+                  <label className="study-mode-option">
+                    <input
+                      type="radio"
+                      name={`study-mode-${deck.id}`}
+                      checked={studyMode === "practice"}
+                      onChange={() => setStudyMode("practice")}
+                      disabled={saving}
+                    />
+                    <span>Practice</span>
+                  </label>
+                  <label className="study-mode-option">
+                    <input
+                      type="radio"
+                      name={`study-mode-${deck.id}`}
+                      checked={studyMode === "exam"}
+                      onChange={() => setStudyMode("exam")}
+                      disabled={saving}
+                    />
+                    <span>Final exam</span>
+                  </label>
+                </div>
+                <div
+                  className={`shuffle-option${saving ? " is-disabled" : ""}`}
+                >
+                  <label
+                    className="shuffle-option-text"
+                    htmlFor={`shuffle-deck-${deck.id}`}
+                  >
+                    Shuffle order
+                  </label>
+                  <input
+                    id={`shuffle-deck-${deck.id}`}
+                    type="checkbox"
+                    checked={shuffleStudy}
+                    onChange={(e) => setShuffleStudy(e.target.checked)}
+                    disabled={saving}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn primary btn-study-start"
+                  onClick={() =>
+                    onStartStudy(cards, shuffleStudy, studyMode)
+                  }
+                >
+                  Start study ({cards.length})
+                </button>
+              </div>
+            </div>
           )}
         </div>
 

@@ -218,8 +218,191 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   margin-top: 1rem;
   margin-bottom: 0.75rem;
+}
+
+.study-header-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+  align-items: center;
+}
+
+.cards-section-title {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.study-options-block {
+  grid-column: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: flex-end;
+}
+
+.study-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.btn-study-start {
+  flex-shrink: 0;
+  width: auto;
+  max-width: 100%;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 540px) {
+  .study-header-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cards-section-title {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .study-options-block {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .study-header-grid {
+    align-items: start;
+  }
+
+  .study-controls-row {
+    justify-content: flex-start;
+  }
+
+  .study-options-block {
+    align-items: flex-start;
+  }
+
+  .study-controls-row {
+    justify-content: flex-start;
+  }
+}
+
+.study-mode-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  font-size: 0.875rem;
+  color: #d1d5db;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.study-mode-group:hover:not(.is-disabled) {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.study-mode-group.is-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.study-mode-heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-right: 0.25rem;
+}
+
+.study-mode-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.study-mode-option input {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+.study-mode-group.is-disabled .study-mode-option {
+  cursor: not-allowed;
+}
+
+.study-mode-group.is-disabled .study-mode-option input {
+  cursor: not-allowed;
+}
+
+.shuffle-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #d1d5db;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.shuffle-option-text {
+  cursor: pointer;
+  user-select: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+.shuffle-option:hover:not(.is-disabled) {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.shuffle-option.is-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.shuffle-option.is-disabled .shuffle-option-text {
+  cursor: not-allowed;
+}
+
+.shuffle-option input {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+
+.shuffle-option.is-disabled input {
+  cursor: not-allowed;
 }
 
 .card-list {
@@ -283,6 +466,50 @@ body {
   border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 999px;
   padding: 0.2rem 0.65rem;
+}
+
+.exam-grade-actions {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.exam-grade-prompt {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.exam-grade-buttons {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.exam-grade-buttons .btn {
+  min-width: 6.5rem;
+}
+
+.exam-summary {
+  margin-top: 1rem;
+  padding: 1.25rem 1rem;
+  border-radius: 0.85rem;
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  text-align: center;
+}
+
+.exam-summary-score {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  letter-spacing: -0.02em;
+}
+
+.exam-summary-detail {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #9ca3af;
 }
 
 .flashcard {

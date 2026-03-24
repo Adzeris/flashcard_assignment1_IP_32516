@@ -7,6 +7,9 @@ function App() {
   const [view, setView] = useState("decks"); // "decks" | "deckDetail" | "study"
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [studyCards, setStudyCards] = useState([]);
+  const [studyShuffle, setStudyShuffle] = useState(true);
+  const [studySessionKey, setStudySessionKey] = useState(0);
+  const [studyMode, setStudyMode] = useState("practice");
 
   function handleOpenDeck(deck) {
     setSelectedDeck(deck);
@@ -18,8 +21,11 @@ function App() {
     setView("decks");
   }
 
-  function handleStartStudy(cards) {
+  function handleStartStudy(cards, shuffle, mode) {
     setStudyCards(cards);
+    setStudyShuffle(shuffle !== false);
+    setStudyMode(mode === "exam" ? "exam" : "practice");
+    setStudySessionKey((k) => k + 1);
     setView("study");
   }
 
@@ -45,7 +51,14 @@ function App() {
           />
         )}
         {view === "study" && selectedDeck && (
-          <StudyPage deck={selectedDeck} cards={studyCards} onExit={handleExitStudy} />
+          <StudyPage
+            key={studySessionKey}
+            deck={selectedDeck}
+            cards={studyCards}
+            shuffleEnabled={studyShuffle}
+            studyMode={studyMode}
+            onExit={handleExitStudy}
+          />
         )}
       </main>
     </div>
