@@ -1,35 +1,15 @@
 import { useEffect, useState } from "react";
 import { fetchCards, createCard, updateCard, deleteCard } from "./api.js";
 
-function cacheKeyForDeck(deckId) {
-  return `flashcards:cards:${deckId}`;
-}
-
-function readCardsCache(deckId) {
-  try {
-    const raw = localStorage.getItem(cacheKeyForDeck(deckId));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeCardsCache(deckId, cards) {
-  try {
-    localStorage.setItem(cacheKeyForDeck(deckId), JSON.stringify(cards));
-  } catch {
-    // Ignore storage failures (private mode / quota)
-  }
+function loadCached(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || []; }
+  catch { return []; }
 }
 
 function DeckDetailPage({ deck, onBack, onStartStudy }) {
-  const [cards, setCards] = useState(() => readCardsCache(deck.id));
-  const [loading, setLoading] = useState(
-    () => readCardsCache(deck.id).length === 0
-  );
-  const [showWakeHint, setShowWakeHint] = useState(false);
+  const cacheKey = "cards_" + deck.id;
+  const [cards, setCards] = useState(() => loadCached(cacheKey));
+  const [loading, setLoading] = useState(() => loadCached(cacheKey).length === 0);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -44,56 +24,33 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
   const [shuffleStudy, setShuffleStudy] = useState(true);
   const [studyMode, setStudyMode] = useState("practice");
 
-  function setCardsAndCache(nextOrUpdater) {
-    setCards((prev) => {
-      const next =
-        typeof nextOrUpdater === "function"
-          ? nextOrUpdater(prev)
-          : nextOrUpdater;
-      writeCardsCache(deck.id, next);
-      return next;
-    });
+  function saveCards(list) {
+    setCards(list);
+    try { localStorage.setItem(cacheKey, JSON.stringify(list)); } catch {}
   }
 
   useEffect(() => {
-    let isMounted = true;
-    const cachedCards = readCardsCache(deck.id);
-    const hasCached = cachedCards.length > 0;
+    let alive = true;
+    const key = "cards_" + deck.id;
+    const hadCache = loadCached(key).length > 0;
 
-    if (hasCached) {
-      setCardsAndCache(cachedCards);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-    setShowWakeHint(false);
-    const wakeHintTimer = setTimeout(() => {
-      if (isMounted && !hasCached) {
-        setShowWakeHint(true);
-      }
-    }, 5000);
     fetchCards(deck.id)
       .then((data) => {
-        if (isMounted) {
-          setCardsAndCache(data);
-          setError("");
-        }
+        if (!alive) return;
+        setCards(data);
+        try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+        setError("");
       })
       .catch((err) => {
-        if (isMounted && !hasCached) {
+        if (alive && !hadCache)
           setError(err.message || "Failed to load cards");
-        }
       })
       .finally(() => {
-        if (isMounted && !hasCached) {
-          setLoading(false);
-          setShowWakeHint(false);
-        }
+        if (!alive) return;
+        setLoading(false);
       });
-    return () => {
-      isMounted = false;
-      clearTimeout(wakeHintTimer);
-    };
+
+    return () => { alive = false; };
   }, [deck.id]);
 
   async function handleCreateCard(e) {
@@ -101,7 +58,6 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
     const q = question.trim();
     const a = answer.trim();
     if (!q || !a) return;
-
     setSaving(true);
     try {
       const card = await createCard(deck.id, {
@@ -109,7 +65,7 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
         answer: a,
         difficulty: Number(difficulty) || 1,
       });
-      setCardsAndCache((prev) => [card, ...prev]);
+      saveCards([card, ...cards]);
       setQuestion("");
       setAnswer("");
       setDifficulty(1);
@@ -141,7 +97,6 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
     const q = editingQuestion.trim();
     const a = editingAnswer.trim();
     if (!q || !a) return;
-
     setSaving(true);
     try {
       const updated = await updateCard(editingId, {
@@ -149,9 +104,7 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
         answer: a,
         difficulty: Number(editingDifficulty) || 1,
       });
-      setCardsAndCache((prev) =>
-        prev.map((c) => (c.id === updated.id ? updated : c))
-      );
+      saveCards(cards.map((c) => (c.id === updated.id ? updated : c)));
       cancelEditing();
       setError("");
     } catch (err) {
@@ -166,7 +119,7 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
     setSaving(true);
     try {
       await deleteCard(id);
-      setCardsAndCache((prev) => prev.filter((c) => c.id !== id));
+      saveCards(cards.filter((c) => c.id !== id));
       setError("");
     } catch (err) {
       setError(err.message || "Failed to delete card");
@@ -249,17 +202,7 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
           </div>
         </form>
 
-        {loading && (
-          <>
-            <p>Loading cards...</p>
-            {showWakeHint && (
-              <p className="subtitle">
-                Waking backend service... this can take up to a minute on free
-                hosting.
-              </p>
-            )}
-          </>
-        )}
+        {loading && <p>Loading cards...</p>}
         {error && !loading && <p className="error">{error}</p>}
 
         {!loading && cards.length === 0 && (
@@ -320,9 +263,7 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
                 <button
                   type="button"
                   className="btn primary btn-study-start"
-                  onClick={() =>
-                    onStartStudy(cards, shuffleStudy, studyMode)
-                  }
+                  onClick={() => onStartStudy(cards, shuffleStudy, studyMode)}
                 >
                   Start study ({cards.length})
                 </button>
@@ -370,4 +311,3 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
 }
 
 export default DeckDetailPage;
-
