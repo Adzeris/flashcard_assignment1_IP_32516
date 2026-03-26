@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DecksPage from "./DecksPage.jsx";
 import DeckDetailPage from "./DeckDetailPage.jsx";
 import StudyPage from "./StudyPage.jsx";
-import { warmUp } from "./api.js";
 
 function App() {
   const [view, setView] = useState("decks");
@@ -11,8 +10,6 @@ function App() {
   const [studyShuffle, setStudyShuffle] = useState(true);
   const [studySessionKey, setStudySessionKey] = useState(0);
   const [studyMode, setStudyMode] = useState("practice");
-
-  useEffect(() => { warmUp(); }, []);
 
   function handleOpenDeck(deck) {
     setSelectedDeck(deck);

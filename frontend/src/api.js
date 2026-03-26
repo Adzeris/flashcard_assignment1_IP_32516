@@ -14,11 +14,6 @@ async function api(path, opts) {
   return res.json();
 }
 
-// hit /health so Render wakes up while the UI loads cached data
-export function warmUp() {
-  fetch(API + "/health").catch(() => {});
-}
-
 export function fetchDecks() {
   return api("/api/decks");
 }

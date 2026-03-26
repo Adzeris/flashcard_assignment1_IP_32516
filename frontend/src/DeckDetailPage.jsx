@@ -6,6 +6,8 @@ function loadCached(key) {
   catch { return []; }
 }
 
+let _busy = false;
+
 function DeckDetailPage({ deck, onBack, onStartStudy }) {
   const cacheKey = "cards_" + deck.id;
   const [cards, setCards] = useState(() => loadCached(cacheKey));
@@ -24,9 +26,12 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
   const [shuffleStudy, setShuffleStudy] = useState(true);
   const [studyMode, setStudyMode] = useState("practice");
 
-  function saveCards(list) {
-    setCards(list);
-    try { localStorage.setItem(cacheKey, JSON.stringify(list)); } catch {}
+  function updateCards(fn) {
+    setCards((prev) => {
+      const next = fn(prev);
+      try { localStorage.setItem(cacheKey, JSON.stringify(next)); } catch {}
+      return next;
+    });
   }
 
   useEffect(() => {
@@ -55,9 +60,11 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
 
   async function handleCreateCard(e) {
     e.preventDefault();
+    if (_busy) return;
     const q = question.trim();
     const a = answer.trim();
     if (!q || !a) return;
+    _busy = true;
     setSaving(true);
     try {
       const card = await createCard(deck.id, {
@@ -65,7 +72,7 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
         answer: a,
         difficulty: Number(difficulty) || 1,
       });
-      saveCards([card, ...cards]);
+      updateCards((prev) => [card, ...prev]);
       setQuestion("");
       setAnswer("");
       setDifficulty(1);
@@ -73,6 +80,7 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
     } catch (err) {
       setError(err.message || "Failed to create card");
     } finally {
+      _busy = false;
       setSaving(false);
     }
   }
@@ -93,10 +101,11 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
 
   async function handleUpdateCard(e) {
     e.preventDefault();
-    if (!editingId) return;
+    if (_busy || !editingId) return;
     const q = editingQuestion.trim();
     const a = editingAnswer.trim();
     if (!q || !a) return;
+    _busy = true;
     setSaving(true);
     try {
       const updated = await updateCard(editingId, {
@@ -104,26 +113,30 @@ function DeckDetailPage({ deck, onBack, onStartStudy }) {
         answer: a,
         difficulty: Number(editingDifficulty) || 1,
       });
-      saveCards(cards.map((c) => (c.id === updated.id ? updated : c)));
+      updateCards((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
       cancelEditing();
       setError("");
     } catch (err) {
       setError(err.message || "Failed to update card");
     } finally {
+      _busy = false;
       setSaving(false);
     }
   }
 
   async function handleDeleteCard(id) {
     if (!window.confirm("Delete this card?")) return;
+    if (_busy) return;
+    _busy = true;
     setSaving(true);
     try {
       await deleteCard(id);
-      saveCards(cards.filter((c) => c.id !== id));
+      updateCards((prev) => prev.filter((c) => c.id !== id));
       setError("");
     } catch (err) {
       setError(err.message || "Failed to delete card");
     } finally {
+      _busy = false;
       setSaving(false);
     }
   }

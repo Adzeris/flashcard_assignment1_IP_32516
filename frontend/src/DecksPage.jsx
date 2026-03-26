@@ -6,6 +6,8 @@ function loadCached(key) {
   catch { return []; }
 }
 
+let _busy = false;
+
 function DecksPage({ onOpenDeck }) {
   const [decks, setDecks] = useState(() => loadCached("decks"));
   const [loading, setLoading] = useState(() => loadCached("decks").length === 0);
@@ -15,9 +17,12 @@ function DecksPage({ onOpenDeck }) {
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
 
-  function saveDecks(list) {
-    setDecks(list);
-    try { localStorage.setItem("decks", JSON.stringify(list)); } catch {}
+  function updateDecks(fn) {
+    setDecks((prev) => {
+      const next = fn(prev);
+      try { localStorage.setItem("decks", JSON.stringify(next)); } catch {}
+      return next;
+    });
   }
 
   useEffect(() => {
@@ -27,7 +32,7 @@ function DecksPage({ onOpenDeck }) {
     fetchDecks()
       .then((data) => {
         if (!alive) return;
-        saveDecks(data);
+        updateDecks(() => data);
         setError("");
       })
       .catch((err) => {
@@ -44,17 +49,21 @@ function DecksPage({ onOpenDeck }) {
 
   async function handleCreateDeck(e) {
     e.preventDefault();
+    if (_busy) return;
     const name = newDeckName.trim();
     if (!name) return;
+    _busy = true;
     setSaving(true);
+    e.target.querySelector('button[type="submit"]').disabled = true;
     try {
       const deck = await createDeck(name);
-      saveDecks([deck, ...decks]);
+      updateDecks((prev) => [deck, ...prev]);
       setNewDeckName("");
       setError("");
     } catch (err) {
       setError(err.message || "Failed to create deck");
     } finally {
+      _busy = false;
       setSaving(false);
     }
   }
@@ -71,32 +80,37 @@ function DecksPage({ onOpenDeck }) {
 
   async function handleUpdateDeck(e) {
     e.preventDefault();
-    if (!editingId) return;
+    if (_busy || !editingId) return;
     const name = editingName.trim();
     if (!name) return;
+    _busy = true;
     setSaving(true);
     try {
       const updated = await updateDeck(editingId, name);
-      saveDecks(decks.map((d) => (d.id === updated.id ? updated : d)));
+      updateDecks((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
       cancelEditing();
       setError("");
     } catch (err) {
       setError(err.message || "Failed to update deck");
     } finally {
+      _busy = false;
       setSaving(false);
     }
   }
 
   async function handleDeleteDeck(id) {
     if (!window.confirm("Delete this deck? This cannot be undone.")) return;
+    if (_busy) return;
+    _busy = true;
     setSaving(true);
     try {
       await deleteDeck(id);
-      saveDecks(decks.filter((d) => d.id !== id));
+      updateDecks((prev) => prev.filter((d) => d.id !== id));
       setError("");
     } catch (err) {
       setError(err.message || "Failed to delete deck");
     } finally {
+      _busy = false;
       setSaving(false);
     }
   }
