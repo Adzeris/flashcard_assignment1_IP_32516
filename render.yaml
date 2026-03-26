@@ -1,0 +1,12 @@
+# Render Blueprint — https://dashboard.render.com/select-repo?type=blueprint
+# Or create a Web Service manually with the same root dir, build, and start commands.
+
+services:
+  - type: web
+    name: flashcards-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health

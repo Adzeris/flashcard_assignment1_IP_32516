@@ -77,6 +77,29 @@ I picked SQLite because it’s just a file and I didn’t want to install a whol
 
 If something breaks, check the backend is running first, then look at the error text on the page (I tried to show API errors instead of a blank screen).
 
+## Deploy for free (live demo)
+
+Two services: **API on Render**, **frontend on Vercel**. Same GitHub repo.
+
+### 1) API — [Render](https://render.com)
+
+1. Sign in → **New** → **Blueprint** (or **Web Service**).
+2. **Blueprint:** connect this repo; Render reads `render.yaml` at the root.  
+   **Or Web Service:** connect repo → **Root Directory** = `backend` → **Build** = `pip install -r requirements.txt` → **Start** = `uvicorn main:app --host 0.0.0.0 --port $PORT`
+3. Wait until it is **Live**. Copy the URL (e.g. `https://flashcards-api-xxxx.onrender.com`).
+4. Open `https://YOUR-URL/health` — you should see `{"status":"ok"}`.
+
+Free tier **sleeps** when idle; first request after sleep can take ~30–60s. SQLite on Render may **reset** after redeploys (demo only).
+
+### 2) Frontend — [Vercel](https://vercel.com)
+
+1. **Add New** → **Project** → import this GitHub repo.
+2. **Root Directory:** `frontend`
+3. **Environment Variables:** add **`VITE_API_BASE`** = your Render URL **with no trailing slash** (same as in `frontend/.env.example`).
+4. Deploy, then open the **Vercel** URL and use the app.
+
+If the UI cannot load decks, check `VITE_API_BASE` matches the Render URL exactly and the API is awake (hit `/health` once).
+
 ## EXTRA
 
 - Just pull and drop the start-frontend.ps1 and start-backend.ps1 in terminals to quickly start the app

@@ -1,37 +1,86 @@
 import { useEffect, useState } from "react";
 import { fetchDecks, createDeck, updateDeck, deleteDeck } from "./api.js";
 
+const DECKS_CACHE_KEY = "flashcards:decks";
+
+function readDecksCache() {
+  try {
+    const raw = localStorage.getItem(DECKS_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDecksCache(decks) {
+  try {
+    localStorage.setItem(DECKS_CACHE_KEY, JSON.stringify(decks));
+  } catch {
+    // Ignore storage failures (private mode / quota)
+  }
+}
+
 function DecksPage({ onOpenDeck }) {
-  const [decks, setDecks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [decks, setDecks] = useState(() => readDecksCache());
+  const [loading, setLoading] = useState(() => readDecksCache().length === 0);
+  const [showWakeHint, setShowWakeHint] = useState(false);
   const [error, setError] = useState("");
   const [newDeckName, setNewDeckName] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
 
+  function setDecksAndCache(nextOrUpdater) {
+    setDecks((prev) => {
+      const next =
+        typeof nextOrUpdater === "function"
+          ? nextOrUpdater(prev)
+          : nextOrUpdater;
+      writeDecksCache(next);
+      return next;
+    });
+  }
+
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
+    const cachedDecks = readDecksCache();
+    const hasCached = cachedDecks.length > 0;
+
+    if (hasCached) {
+      setDecksAndCache(cachedDecks);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+    setShowWakeHint(false);
+    const wakeHintTimer = setTimeout(() => {
+      if (isMounted && !hasCached) {
+        setShowWakeHint(true);
+      }
+    }, 5000);
     fetchDecks()
       .then((data) => {
         if (isMounted) {
-          setDecks(data);
+          setDecksAndCache(data);
           setError("");
         }
       })
       .catch((err) => {
-        if (isMounted) {
+        if (isMounted && !hasCached) {
           setError(err.message || "Failed to load decks");
         }
       })
       .finally(() => {
-        if (isMounted) {
+        if (isMounted && !hasCached) {
           setLoading(false);
+          setShowWakeHint(false);
         }
       });
     return () => {
       isMounted = false;
+      clearTimeout(wakeHintTimer);
     };
   }, []);
 
@@ -43,7 +92,7 @@ function DecksPage({ onOpenDeck }) {
     setSaving(true);
     try {
       const deck = await createDeck(name);
-      setDecks((prev) => [deck, ...prev]);
+      setDecksAndCache((prev) => [deck, ...prev]);
       setNewDeckName("");
       setError("");
     } catch (err) {
@@ -72,7 +121,7 @@ function DecksPage({ onOpenDeck }) {
     setSaving(true);
     try {
       const updated = await updateDeck(editingId, name);
-      setDecks((prev) =>
+      setDecksAndCache((prev) =>
         prev.map((d) => (d.id === updated.id ? updated : d))
       );
       cancelEditing();
@@ -91,7 +140,7 @@ function DecksPage({ onOpenDeck }) {
     setSaving(true);
     try {
       await deleteDeck(id);
-      setDecks((prev) => prev.filter((d) => d.id !== id));
+      setDecksAndCache((prev) => prev.filter((d) => d.id !== id));
       setError("");
     } catch (err) {
       setError(err.message || "Failed to delete deck");
@@ -140,7 +189,17 @@ function DecksPage({ onOpenDeck }) {
           </div>
         </form>
 
-        {loading && <p>Loading decks...</p>}
+        {loading && (
+          <>
+            <p>Loading decks...</p>
+            {showWakeHint && (
+              <p className="subtitle">
+                Waking backend service... this can take up to a minute on free
+                hosting.
+              </p>
+            )}
+          </>
+        )}
         {error && !loading && <p className="error">{error}</p>}
 
         {!loading && decks.length === 0 && (
